@@ -320,7 +320,6 @@ fn to_local_time(time_value: &ColumnarValue) -> Result<ColumnarValue> {
 /// ```
 ///
 /// See `test_adjust_to_local_time()` for example
-
 #[cfg(test)]
 mod tests {
     use std::sync::Arc;

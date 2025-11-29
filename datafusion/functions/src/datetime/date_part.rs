@@ -129,7 +129,7 @@ impl DatePartFunc {
                         Coercion::new_exact(TypeSignatureClass::Duration),
                     ]),
                 ],
-                Volatility::Immutable,
+                Volatility::Stable,
             ),
             aliases: vec![String::from("datepart"), String::from("extract")],
         }
@@ -216,10 +216,7 @@ impl ScalarUDFImpl for DatePartFunc {
             // For timezone-aware timestamps, extract in their own timezone
             match tz_str_opt.as_ref() {
                 Some(tz_str) => {
-                    let tz = match tz_str.parse::<Tz>() {
-                        Ok(tz) => tz,
-                        Err(_) => return exec_err!("Invalid timezone"),
-                    };
+                    let tz = interpret_session_timezone(tz_str)?;
                     match array.data_type() {
                         Timestamp(time_unit, _) => match time_unit {
                             Nanosecond => adjust_timestamp_array::<
@@ -244,10 +241,7 @@ impl ScalarUDFImpl for DatePartFunc {
             // For naive timestamps, interpret in session timezone if available
             match config.execution.time_zone.as_ref() {
                 Some(tz_str) => {
-                    let tz = match tz_str.parse::<Tz>() {
-                        Ok(tz) => tz,
-                        Err(_) => return exec_err!("Invalid timezone"),
-                    };
+                    let tz = interpret_session_timezone(tz_str)?;
 
                     match time_unit {
                         Nanosecond => {
@@ -347,6 +341,13 @@ fn part_normalization(part: &str) -> &str {
     part.strip_prefix(|c| c == '\'' || c == '\"')
         .and_then(|s| s.strip_suffix(|c| c == '\'' || c == '\"'))
         .unwrap_or(part)
+}
+
+fn interpret_session_timezone(tz_str: &str) -> Result<Tz> {
+    match tz_str.parse::<Tz>() {
+        Ok(tz) => Ok(tz),
+        Err(err) => exec_err!("Invalid timezone '{tz_str}': {err}"),
+    }
 }
 
 fn seconds_as_i32(array: &dyn Array, unit: TimeUnit) -> Result<ArrayRef> {

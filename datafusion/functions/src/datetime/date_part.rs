@@ -207,7 +207,7 @@ impl ScalarUDFImpl for DatePartFunc {
         };
 
         let part_trim = part_normalization(&part);
-        let is_epoch = is_epoch(&part);
+        let is_epoch = is_epoch(part_trim);
 
         // Epoch is timezone-independent - it always returns seconds since 1970-01-01 UTC
         let array = if is_epoch {
@@ -333,10 +333,11 @@ fn adjust_timestamp_array<T: ArrowTimestampType>(
 }
 
 fn is_epoch(part: &str) -> bool {
-    let part = part_normalization(part);
     matches!(part.to_lowercase().as_str(), "epoch")
 }
 
+// Try to remove quote if exist, if the quote is invalid, return original string
+// and let the downstream function handle the error.
 fn part_normalization(part: &str) -> &str {
     part.strip_prefix(|c| c == '\'' || c == '\"')
         .and_then(|s| s.strip_suffix(|c| c == '\'' || c == '\"'))
@@ -351,6 +352,7 @@ fn interpret_session_timezone(tz_str: &str) -> Result<Tz> {
 }
 
 fn seconds_as_i32(array: &dyn Array, unit: TimeUnit) -> Result<ArrayRef> {
+    // Nanosecond is neither supported in Postgres nor DuckDB, to avoid dealing
     // with overflow and precision issue we don't support nanosecond
     if unit == Nanosecond {
         return not_impl_err!("Date part {unit:?} not supported");

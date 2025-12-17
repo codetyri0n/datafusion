@@ -27,32 +27,18 @@ use arrow::compute::kernels::cast_utils::string_to_timestamp_nanos;
 use arrow::datatypes::TimeUnit::{Microsecond, Millisecond, Nanosecond, Second};
 use arrow::datatypes::{ArrowTimestampType, DataType};
 
-use chrono::format::{parse, Parsed, StrftimeItems};
 use chrono::LocalResult::Single;
+use chrono::format::{Parsed, StrftimeItems, parse};
 use chrono::{DateTime, MappedLocalTime, Offset, TimeDelta, TimeZone, Utc};
 
 use std::ops::Add;
 
 use datafusion_common::cast::as_generic_string_array;
 use datafusion_common::{
-    exec_datafusion_err,
-    exec_err,
-    internal_datafusion_err,
-    unwrap_or_internal_err,
-    DataFusionError,
-    Result,
-    ScalarType,
-    ScalarValue,
+    DataFusionError, Result, ScalarType, ScalarValue, exec_datafusion_err, exec_err,
+    internal_datafusion_err, unwrap_or_internal_err,
 };
 
-use arrow::datatypes::DataType;
-use chrono::LocalResult::Single;
-use chrono::format::{Parsed, StrftimeItems, parse};
-use chrono::{DateTime, TimeZone, Utc};
-
-use datafusion_common::cast::as_generic_string_array;
-use datafusion_common::{
-    DataFusionError, Result, ScalarType, ScalarValue, exec_datafusion_err, exec_er
 use datafusion_expr::ColumnarValue;
 
 /// Error message if nanosecond conversion request beyond supported interval

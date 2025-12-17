@@ -29,14 +29,7 @@ use arrow::datatypes::{
 
 use crate::datetime::adjust_to_local_time;
 use datafusion_common::cast::as_primitive_array;
-use datafusion_common::{
-    exec_err,
-    internal_datafusion_err,
-    internal_err,
-    utils::take_function_args,
-    Result,
-    ScalarValue,
-};
+use datafusion_common::{Result, ScalarValue, internal_err, utils::take_function_args};
 
 use datafusion_expr::{
     Coercion, ColumnarValue, Documentation, ScalarUDFImpl, Signature, TypeSignatureClass,
@@ -334,11 +327,7 @@ mod tests {
 
     use super::ToLocalTimeFunc;
     use crate::datetime::adjust_to_local_time;
-    use arrow::array::{
-        Array,
-        TimestampNanosecondArray,
-        types::TimestampNanosecondType,
-    };
+    use arrow::array::{Array, TimestampNanosecondArray, types::TimestampNanosecondType};
 
     use arrow::compute::kernels::cast_utils::string_to_timestamp_nanos;
     use arrow::datatypes::{DataType, Field, TimeUnit};
